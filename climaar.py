@@ -1,7 +1,10 @@
+import json
+import os
 import requests
 
 URL = "https://api.open-meteo.com/v1/forecast"
 URL_BUSQUEDA = "https://geocoding-api.open-meteo.com/v1/search"
+ARCHIVO_FAVORITAS = "favoritas.json"
 
 
 def describir_temperatura(temp):
@@ -20,6 +23,14 @@ def recomendar_ropa(temp):
         return "Llevá una campera ligera"
     else:
         return "Podés usar ropa ligera"
+
+
+def pedir_numero(maximo):
+    texto = input("Elegí un número: ")
+    if texto.isdigit() and 1 <= int(texto) <= maximo:
+        return int(texto)
+    print("Opción no válida.")
+    return None
 
 
 def buscar_ciudad():
@@ -41,12 +52,54 @@ def buscar_ciudad():
     for numero, lugar in enumerate(resultados, start=1):
         print(numero, "-", lugar["name"], "|", lugar.get("admin1", "-"), "|", lugar.get("country", "-"))
 
-    eleccion = input("Elegí un número: ")
-    if eleccion.isdigit() and 1 <= int(eleccion) <= len(resultados):
-        return resultados[int(eleccion) - 1]
+    numero = pedir_numero(len(resultados))
+    if numero is None:
+        return None
+    return resultados[numero - 1]
 
-    print("Opción no válida.")
-    return None
+
+def cargar_favoritas():
+    if not os.path.exists(ARCHIVO_FAVORITAS):
+        return []
+    with open(ARCHIVO_FAVORITAS, "r", encoding="utf-8") as archivo:
+        return json.load(archivo)
+
+
+def guardar_favoritas(favoritas):
+    with open(ARCHIVO_FAVORITAS, "w", encoding="utf-8") as archivo:
+        json.dump(favoritas, archivo, ensure_ascii=False, indent=2)
+
+
+def elegir_favorita():
+    favoritas = cargar_favoritas()
+    if len(favoritas) == 0:
+        print("Todavía no tenés ciudades favoritas.")
+        return None
+
+    for numero, lugar in enumerate(favoritas, start=1):
+        print(numero, "-", lugar["name"], "|", lugar["admin1"])
+
+    numero = pedir_numero(len(favoritas))
+    if numero is None:
+        return None
+    return favoritas[numero - 1]
+
+
+def agregar_favorita(ciudad):
+    favoritas = cargar_favoritas()
+    for lugar in favoritas:
+        if lugar["latitude"] == ciudad["latitude"] and lugar["longitude"] == ciudad["longitude"]:
+            print("Esa ciudad ya está en tus favoritas.")
+            return
+
+    favoritas.append({
+        "name": ciudad["name"],
+        "admin1": ciudad.get("admin1", "-"),
+        "latitude": ciudad["latitude"],
+        "longitude": ciudad["longitude"],
+    })
+    guardar_favoritas(favoritas)
+    print("Guardada en favoritas.")
 
 
 def pedir_datos(parametros):
@@ -115,7 +168,20 @@ def mostrar_pronostico(diario):
         )
 
 
-ciudad = buscar_ciudad()
+print("1 - Buscar una ciudad")
+print("2 - Ver mis favoritas")
+opcion = input("¿Qué querés hacer? ")
+
+ciudad = None
+es_nueva = False
+
+if opcion == "1":
+    ciudad = buscar_ciudad()
+    es_nueva = True
+elif opcion == "2":
+    ciudad = elegir_favorita()
+else:
+    print("Opción no válida.")
 
 if ciudad is not None:
     latitud = ciudad["latitude"]
@@ -128,3 +194,9 @@ if ciudad is not None:
     diario = obtener_pronostico(latitud, longitud)
     if diario is not None:
         mostrar_pronostico(diario)
+
+    if es_nueva:
+        print()
+        respuesta = input("¿Querés guardarla en favoritas? (s/n) ")
+        if respuesta.lower() == "s":
+            agregar_favorita(ciudad)
