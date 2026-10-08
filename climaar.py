@@ -32,18 +32,29 @@ def pedir_numero(maximo):
     print("Opción no válida.")
     return None
 
+def hacer_peticion(url, parametros):
+    try:
+        respuesta = requests.get(url, params=parametros, timeout=10)
+    except requests.exceptions.Timeout:
+        print("La conexión demoró demasiado. Volvé a intentarlo en unos minutos.")
+        return None
+    except requests.exceptions.ConnectionError:
+        print("No se pudo conectar al servidor. Revise su conexión a internet.")
+        return None
+
+    if respuesta.status_code != 200:
+        print("Error en el servicio. Código:",respuesta.status_code)
+        return None
+
+    return respuesta.json()
+
 
 def buscar_ciudad():
     nombre = input("¿Qué ciudad querés buscar? ")
-    respuesta = requests.get(
-        URL_BUSQUEDA,
-        params={"name": nombre, "count": 5, "language": "es"},
-    )
-    if respuesta.status_code != 200:
-        print("Error al buscar la ciudad. Código:", respuesta.status_code)
+    datos = hacer_peticion(URL_BUSQUEDA, {"name": nombre, "count": 5, "language": "es"})
+    if datos is None:
         return None
 
-    datos = respuesta.json()
     if "results" not in datos:
         print("No encontré ninguna ciudad con ese nombre.")
         return None
@@ -103,11 +114,7 @@ def agregar_favorita(ciudad):
 
 
 def pedir_datos(parametros):
-    respuesta = requests.get(URL, params=parametros)
-    if respuesta.status_code == 200:
-        return respuesta.json()
-    print("Error al pedir los datos. Código:", respuesta.status_code)
-    return None
+    return hacer_peticion(URL, parametros)
 
 
 def obtener_clima_actual(latitud, longitud):
