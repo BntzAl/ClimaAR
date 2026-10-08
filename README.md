@@ -4,10 +4,14 @@ Aplicación meteorológica desarrollada en Python, pensada como proyecto de apre
 
 ## Qué hace hoy
 
-- Busca ciudades por nombre y deja elegir entre los resultados.
-- Muestra el clima actual: temperatura, sensación térmica, humedad, viento y presión.
-- Muestra el pronóstico de 7 días con probabilidad de lluvia.
-- Recomienda ropa según la sensación térmica.
+- Busca ciudades por nombre.
+- Permite elegir entre los resultados encontrados.
+- Muestra el clima actual.
+- Muestra el pronóstico de 7 días.
+- Muestra temperatura y sensación térmica.
+- Muestra humedad, viento y presión atmosférica.
+- Recomienda ropa según la temperatura.
+- Permite guardar ciudades favoritas.
 
 ## Cómo ejecutarlo
 
@@ -24,6 +28,9 @@ Aplicación meteorológica desarrollada en Python, pensada como proyecto de apre
 
 ## Próximos pasos
 
-- Interfaz gráfica.
-- Ciudades favoritas.
-- Versión para Android, macOS y Windows.
+- Mejorar el menú de navegación.
+- Agregar códigos e íconos meteorológicos.
+- Agregar más información meteorológica.
+- Crear una interfaz gráfica.
+- Mejorar el manejo de errores.
+- Crear versiones para Windows, macOS y Android.
