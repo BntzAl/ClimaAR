@@ -7,24 +7,6 @@ URL_BUSQUEDA = "https://geocoding-api.open-meteo.com/v1/search"
 ARCHIVO_FAVORITAS = "favoritas.json"
 
 
-def describir_temperatura(temp):
-    if temp < 10:
-        return "Hace frío"
-    elif temp < 20:
-        return "Está fresco"
-    else:
-        return "Hace calor"
-
-
-def recomendar_ropa(temp):
-    if temp < 10:
-        return "Abrigate bien"
-    elif temp < 20:
-        return "Llevá una campera ligera"
-    else:
-        return "Podés usar ropa ligera"
-
-
 def pedir_numero(maximo):
     texto = input("Elegí un número: ")
     if texto.isdigit() and 1 <= int(texto) <= maximo:
@@ -43,7 +25,7 @@ def hacer_peticion(url, parametros):
         return None
 
     if respuesta.status_code != 200:
-        print("Error en el servicio. Código:",respuesta.status_code)
+        print("Error en el servicio. Código:", respuesta.status_code)
         return None
 
     return respuesta.json()
@@ -95,6 +77,46 @@ def elegir_favorita():
         return None
     return favoritas[numero - 1]
 
+def eliminar_favorita():
+    favoritas = cargar_favoritas()
+    if len(favoritas) == 0:
+        print("Todavía no tenés ciudades favoritas.")
+        return
+
+    for numero, lugar in enumerate(favoritas, start=1):
+        print(numero, "-", lugar["name"], "|", lugar["admin1"])
+
+    numero = pedir_numero(len(favoritas))
+    if numero is None:
+        return
+
+    eliminada = favoritas[numero - 1]
+    
+    favoritas.pop(numero - 1)
+
+    guardar_favoritas(favoritas)
+
+    print("Se eliminó", eliminada["name"])
+
+def menu_favoritas():
+    print()
+    print("--- Mis Favoritas ---")
+    print("1 - Consultar una ciudad")
+    print("2 - Eliminar una ciudad")
+    print("3 - Volver")
+
+    opcion = input("¿Qué querés hacer? ")
+
+    if opcion == "1":
+        return elegir_favorita()
+    elif opcion == "2":
+        eliminar_favorita()
+        return None
+    elif opcion == "3":
+        return None
+    else:
+        print("La opción no es válida.")
+        return None
 
 def agregar_favorita(ciudad):
     favoritas = cargar_favoritas()
@@ -116,12 +138,37 @@ def agregar_favorita(ciudad):
 def pedir_datos(parametros):
     return hacer_peticion(URL, parametros)
 
+def describir_clima(codigo):
+    if codigo == 0:
+        return "Despejado"
+    elif codigo in [1, 2]:
+        return "Parcialmente nublado"
+    elif codigo == 3:
+        return "Nublado"
+    elif codigo in [45, 48]:
+        return "Niebla"
+    elif codigo in [51, 53, 55]:
+        return "Llovizna"
+    elif codigo in [56, 57, 61, 63, 65]:
+        return "Lluvia"
+    elif codigo in [66, 67]:
+        return "Lluvia intensa"
+    elif codigo in [71, 73, 75, 77]:
+        return "Nieve"
+    elif codigo in [80, 81, 82]:
+        return "Chubascos"
+    elif codigo in [85, 86]:
+        return "Nieve intensa"
+    elif codigo in [95, 96, 99]:
+        return "Tormenta"
+    else:
+        return "Desconocido"
 
 def obtener_clima_actual(latitud, longitud):
     parametros = {
         "latitude": latitud,
         "longitude": longitud,
-        "current": "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,surface_pressure",
+        "current": "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,surface_pressure,weather_code",
         "timezone": "auto",
     }
     datos = pedir_datos(parametros)
@@ -134,7 +181,7 @@ def obtener_pronostico(latitud, longitud):
     parametros = {
         "latitude": latitud,
         "longitude": longitud,
-        "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,apparent_temperature_max",
+        "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,apparent_temperature_max,weather_code",
         "timezone": "auto",
     }
     datos = pedir_datos(parametros)
@@ -149,61 +196,72 @@ def mostrar_clima_actual(actual, ciudad):
     print("        CLIMAAR")
     print("========================")
     print("Ubicación:", ciudad["name"], "|", ciudad.get("admin1", "-"))
-    print("Medición:", actual["time"])
+    print("Estado:", describir_clima(actual["weather_code"]))
+    print("Medición:", actual["time"].replace("T", " "))
+    print()
+    print("--- Condiciones actuales ---")
     print("Temperatura:", actual["temperature_2m"], "°C")
     print("Sensación térmica:", actual["apparent_temperature"], "°C")
     print("Humedad:", actual["relative_humidity_2m"], "%")
     print("Viento:", actual["wind_speed_10m"], "km/h")
     print("Presión atmosférica:", actual["surface_pressure"], "hPa")
     print()
-    print(describir_temperatura(actual["temperature_2m"]))
-    print("Recomendación de ropa:", recomendar_ropa(actual["apparent_temperature"]))
 
 
 def mostrar_pronostico(diario):
     print()
     print("--- Pronóstico de 7 días ---")
+
     for i in range(len(diario["time"])):
-        print(
-            diario["time"][i],
-            "| Máx:", diario["temperature_2m_max"][i], "°C",
-            "| Mín:", diario["temperature_2m_min"][i], "°C",
-            "| Lluvia:", diario["precipitation_probability_max"][i], "%",
-            "| Sens:", diario["apparent_temperature_max"][i], "°C",
-            "|", describir_temperatura(diario["temperature_2m_max"][i]),
-            "|", recomendar_ropa(diario["apparent_temperature_max"][i]),
-        )
-
-
-print("1 - Buscar una ciudad")
-print("2 - Ver mis favoritas")
-opcion = input("¿Qué querés hacer? ")
-
-ciudad = None
-es_nueva = False
-
-if opcion == "1":
-    ciudad = buscar_ciudad()
-    es_nueva = True
-elif opcion == "2":
-    ciudad = elegir_favorita()
-else:
-    print("Opción no válida.")
-
-if ciudad is not None:
-    latitud = ciudad["latitude"]
-    longitud = ciudad["longitude"]
-
-    actual = obtener_clima_actual(latitud, longitud)
-    if actual is not None:
-        mostrar_clima_actual(actual, ciudad)
-
-    diario = obtener_pronostico(latitud, longitud)
-    if diario is not None:
-        mostrar_pronostico(diario)
-
-    if es_nueva:
         print()
-        respuesta = input("¿Querés guardarla en favoritas? (s/n) ")
-        if respuesta.lower() == "s":
-            agregar_favorita(ciudad)
+        print(diario["time"][i])
+        print("Máxima:", diario["temperature_2m_max"][i], "°C")
+        print("Mínima:", diario["temperature_2m_min"][i], "°C")
+        print("Sensación térmica máxima:", diario["apparent_temperature_max"][i], "°C")
+        print("Probabilidad de lluvia:", diario["precipitation_probability_max"][i], "%")
+        print("Estado:", describir_clima(diario["weather_code"][i]))
+        print("----------------------")
+
+while True:
+    print()
+    print("--- ClimaAR ---")
+    print("1 - Buscar una ciudad")
+    print("2 - Ver mis favoritas")
+    print("3 - Salir")
+
+    opcion = input("¿Qué querés hacer? ")
+
+    ciudad = None
+    es_nueva = False
+
+    if opcion == "1":
+        ciudad = buscar_ciudad()
+        es_nueva = True
+
+    elif opcion == "2":
+        ciudad = menu_favoritas()
+
+    elif opcion == "3":
+        print("¡Hasta luego!")
+        break
+
+    else:
+        print("La opción no es válida.")
+
+    if ciudad is not None:
+        latitud = ciudad["latitude"]
+        longitud = ciudad["longitude"]
+
+        actual = obtener_clima_actual(latitud, longitud)
+        if actual is not None:
+            mostrar_clima_actual(actual, ciudad)
+
+        diario = obtener_pronostico(latitud, longitud)
+        if diario is not None:
+            mostrar_pronostico(diario)
+
+        if es_nueva:
+            print()
+            respuesta = input("¿Querés guardar esta ciudad en tus favoritas? (s/n) ")
+            if respuesta.lower() == "s":
+                agregar_favorita(ciudad)
