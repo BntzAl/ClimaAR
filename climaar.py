@@ -5,6 +5,36 @@ import requests
 URL = "https://api.open-meteo.com/v1/forecast"
 URL_BUSQUEDA = "https://geocoding-api.open-meteo.com/v1/search"
 ARCHIVO_FAVORITAS = "favoritas.json"
+CODIGOS_CLIMA = {
+    0: "Despejado",
+    1: "Mayormente despejado",
+    2: "Parcialmente nublado",
+    3: "Nublado",
+    45: "Niebla",
+    48: "Niebla con escarcha",
+    51: "Llovizna leve",
+    53: "Llovizna moderada",
+    55: "Llovizna intensa",
+    56: "Llovizna helada",
+    57: "Llovizna helada",
+    61: "Lluvia leve",
+    63: "Lluvia moderada",
+    65: "Lluvia fuerte",
+    66: "Lluvia helada",
+    67: "Lluvia helada",
+    71: "Nevada leve",
+    73: "Nevada moderada",
+    75: "Nevada fuerte",
+    77: "Granos de nieve",
+    80: "Chubascos leves",
+    81: "Chubascos moderados",
+    82: "Chubascos violentos",
+    85: "Chubascos de nieve leves",
+    86: "Chubascos de nieve fuertes",
+    95: "Tormenta",
+    96: "Tormenta con granizo",
+    99: "Tormenta con granizo fuerte",
+}
 
 
 def pedir_numero(maximo):
@@ -21,7 +51,7 @@ def hacer_peticion(url, parametros):
         print("La conexión demoró demasiado. Volvé a intentarlo en unos minutos.")
         return None
     except requests.exceptions.ConnectionError:
-        print("No se pudo conectar al servidor. Revise su conexión a internet.")
+        print("No se pudo conectar al servidor. Revisá tu conexión a internet.")
         return None
 
     if respuesta.status_code != 200:
@@ -90,9 +120,7 @@ def eliminar_favorita():
     if numero is None:
         return
 
-    eliminada = favoritas[numero - 1]
-    
-    favoritas.pop(numero - 1)
+    eliminada = favoritas.pop(numero - 1)
 
     guardar_favoritas(favoritas)
 
@@ -139,30 +167,7 @@ def pedir_datos(parametros):
     return hacer_peticion(URL, parametros)
 
 def describir_clima(codigo):
-    if codigo == 0:
-        return "Despejado"
-    elif codigo in [1, 2]:
-        return "Parcialmente nublado"
-    elif codigo == 3:
-        return "Nublado"
-    elif codigo in [45, 48]:
-        return "Niebla"
-    elif codigo in [51, 53, 55]:
-        return "Llovizna"
-    elif codigo in [56, 57, 61, 63, 65]:
-        return "Lluvia"
-    elif codigo in [66, 67]:
-        return "Lluvia intensa"
-    elif codigo in [71, 73, 75, 77]:
-        return "Nieve"
-    elif codigo in [80, 81, 82]:
-        return "Chubascos"
-    elif codigo in [85, 86]:
-        return "Nieve intensa"
-    elif codigo in [95, 96, 99]:
-        return "Tormenta"
-    else:
-        return "Desconocido"
+    return CODIGOS_CLIMA.get(codigo, "Desconocido")
 
 def obtener_clima_actual(latitud, longitud):
     parametros = {
