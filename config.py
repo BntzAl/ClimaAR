@@ -1,0 +1,33 @@
+URL = "https://api.open-meteo.com/v1/forecast"
+URL_BUSQUEDA = "https://geocoding-api.open-meteo.com/v1/search"
+ARCHIVO_FAVORITAS = "favoritas.json"
+CODIGOS_CLIMA = {
+    0: "Despejado",
+    1: "Mayormente despejado",
+    2: "Parcialmente nublado",
+    3: "Nublado",
+    45: "Niebla",
+    48: "Niebla con escarcha",
+    51: "Llovizna leve",
+    53: "Llovizna moderada",
+    55: "Llovizna intensa",
+    56: "Llovizna helada",
+    57: "Llovizna helada",
+    61: "Lluvia leve",
+    63: "Lluvia moderada",
+    65: "Lluvia fuerte",
+    66: "Lluvia helada",
+    67: "Lluvia helada",
+    71: "Nevada leve",
+    73: "Nevada moderada",
+    75: "Nevada fuerte",
+    77: "Granos de nieve",
+    80: "Chubascos leves",
+    81: "Chubascos moderados",
+    82: "Chubascos violentos",
+    85: "Chubascos de nieve leves",
+    86: "Chubascos de nieve fuertes",
+    95: "Tormenta",
+    96: "Tormenta con granizo",
+    99: "Tormenta con granizo fuerte",
+}

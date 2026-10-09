@@ -14,6 +14,13 @@ Aplicación meteorológica desarrollada en Python, pensada como proyecto de apre
 - Tiene un menú de navegación con opción de salir.
 - Muestra mensajes claros cuando falla la conexión.
 
+## Estructura del proyecto
+
+- `climaar.py`: menú y pantallas de la aplicación.
+- `api.py`: pedidos a la API de Open-Meteo.
+- `favoritas.py`: lectura y escritura de ciudades favoritas.
+- `config.py`: constantes y códigos del clima.
+
 ## Cómo ejecutarlo
 
 1. Instalar Python.
@@ -29,7 +36,6 @@ Aplicación meteorológica desarrollada en Python, pensada como proyecto de apre
 
 ## Próximos pasos
 
-- Ordenar el código en módulos.
 - Agregar íconos meteorológicos.
 - Agregar más información meteorológica.
 - Crear una interfaz gráfica.
