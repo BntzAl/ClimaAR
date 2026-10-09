@@ -6,12 +6,13 @@ Aplicación meteorológica desarrollada en Python, pensada como proyecto de apre
 
 - Busca ciudades por nombre.
 - Permite elegir entre los resultados encontrados.
-- Muestra el clima actual.
+- Muestra el clima actual y su estado (despejado, nublado, lluvia, etc.).
 - Muestra el pronóstico de 7 días.
 - Muestra temperatura y sensación térmica.
 - Muestra humedad, viento y presión atmosférica.
-- Recomienda ropa según la temperatura.
-- Permite guardar ciudades favoritas.
+- Permite guardar, consultar y eliminar ciudades favoritas.
+- Tiene un menú de navegación con opción de salir.
+- Muestra mensajes claros cuando falla la conexión.
 
 ## Cómo ejecutarlo
 
@@ -28,9 +29,8 @@ Aplicación meteorológica desarrollada en Python, pensada como proyecto de apre
 
 ## Próximos pasos
 
-- Mejorar el menú de navegación.
-- Agregar códigos e íconos meteorológicos.
+- Ordenar el código en módulos.
+- Agregar íconos meteorológicos.
 - Agregar más información meteorológica.
 - Crear una interfaz gráfica.
-- Mejorar el manejo de errores.
 - Crear versiones para Windows, macOS y Android.
